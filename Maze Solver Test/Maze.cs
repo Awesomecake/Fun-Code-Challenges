@@ -273,6 +273,56 @@ namespace Maze_Solver_Test
                     start.Visited = true;
                     #endregion
                 }
+                if (SingleKeyPress(kbState, Keys.D7))
+                {
+                    solvedMaze.Clear();
+                    animationMode = 3;
+
+                    #region Setup For Maze Generation Animation
+                    for (int i = 0; i < maze.GetLength(0); i++)
+                    {
+                        for (int j = 0; j < maze.GetLength(1); j++)
+                        {
+                            CreateSquare(TileType.Wall, i, j);
+                        }
+                    }
+
+                    animationStack = new Stack<Tile>();
+
+                    int xStart = rng.Next(0, width);
+                    int yStart = rng.Next(0, height);
+
+                    if (xStart % 2 == 0)
+                    {
+                        if (xStart + 1 < width)
+                        {
+                            xStart++;
+                        }
+                        else
+                        {
+                            xStart--;
+                        }
+                    }
+
+                    if (yStart % 2 == 0)
+                    {
+                        if (yStart + 1 < height)
+                        {
+                            yStart++;
+                        }
+                        else
+                        {
+                            yStart--;
+                        }
+                    }
+
+                    animationStack.Push(maze[xStart, yStart]);
+
+                    //Commenting out allows for loop to exist at start point
+                    maze[xStart, yStart].Visited = true;
+                    maze[xStart, yStart].type = TileType.Empty;
+                    #endregion
+                }
 
                 if (SingleKeyPress(kbState, Keys.V))
                 {
@@ -424,6 +474,78 @@ namespace Maze_Solver_Test
                         animationMode = -1;
                     }
 
+                }
+                #endregion
+            }
+            else if(animationMode == 3)
+            {
+                #region Maze Generator Animation
+                animationTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+                //Loop while we have tiles in the stack
+                if (animationStack.Count != 0 && animationTimer > 0.025)
+                {
+                    animationTimer = 0;
+
+                    Tile current = animationStack.Peek();
+
+                    List<int> choices = new List<int> { 1, 2, 3, 4 };
+
+                    Tile preSelection = null;
+                    Tile selection = null;
+
+                    while (choices.Count != 0 && selection == null)
+                    {
+                        int choice = choices[rng.Next(0, choices.Count)];
+                        //Check the neighbors of the current Tile, Put them on stack if valid
+                        if (IsTileValidEmpty(current.X + 2, current.Y) && choice == 1)
+                        {
+                            preSelection = maze[current.X + 1, current.Y];
+                            selection = maze[current.X + 2, current.Y];
+                        }
+                        else if (IsTileValidEmpty(current.X - 2, current.Y) && choice == 2)
+                        {
+                            preSelection = maze[current.X - 1, current.Y];
+                            selection = maze[current.X - 2, current.Y];
+                        }
+                        else if (IsTileValidEmpty(current.X, current.Y + 2) && choice == 3)
+                        {
+                            preSelection = maze[current.X, current.Y + 1];
+                            selection = maze[current.X, current.Y + 2];
+                        }
+                        else if (IsTileValidEmpty(current.X, current.Y - 2) && choice == 4)
+                        {
+                            preSelection = maze[current.X, current.Y - 1];
+                            selection = maze[current.X, current.Y - 2];
+                        }
+
+                        choices.Remove(choice);
+                    }
+
+                    //If there are no valid neighbors, back up to the previous tile
+                    if (selection == null)
+                    {
+                        animationStack.Pop();
+                        if (animationStack.Count > 0)
+                            animationStack.Pop();
+                    }
+                    else
+                    {
+                        animationStack.Push(preSelection);
+                        animationStack.Push(selection);
+
+                        selection.type = TileType.Empty;
+                        preSelection.type = TileType.Empty;
+
+                        preSelection.Visited = true;
+                        selection.Visited = true;
+                    }
+
+                    //If the current tile is the end, quit the search
+                    if (animationStack.Count == 0)
+                    {
+                        animationMode = -1;
+                    }
                 }
                 #endregion
             }
