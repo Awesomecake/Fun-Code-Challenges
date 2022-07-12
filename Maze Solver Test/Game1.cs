@@ -26,7 +26,7 @@ namespace Maze_Solver_Test
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            CreateMaze(11, 11);
+            CreateMaze(101, 101);
 
             base.Initialize();
         }
