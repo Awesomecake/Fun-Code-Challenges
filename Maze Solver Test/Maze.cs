@@ -28,6 +28,7 @@ namespace Maze_Solver_Test
 
         private int animationMode = -1;
         private Stack<Tile> animationStack;
+        private float animationTimer = 0;
 
         Random rng;
 
@@ -58,7 +59,7 @@ namespace Maze_Solver_Test
             return maze[x, y] = new Tile(type, x, y,screenWidth/width,screenHeight/height);
         }
 
-        public void Update()
+        public void Update(GameTime gameTime)
         {
             if (animationMode == -1)
             {
@@ -180,8 +181,10 @@ namespace Maze_Solver_Test
                 if (SingleKeyPress(kbState, Keys.D5) && start != null && end != null)
                 {
                     solvedMaze.Clear();
-                    //Animate DijikstraAlgorith
                     animationMode = 1;
+
+                    #region Setup For Dijikstra Animation
+                    //Animate DijikstraAlgorith
 
                     foreach (Tile item in maze)
                     {
@@ -245,6 +248,30 @@ namespace Maze_Solver_Test
 
                     animationStack.Push(end);
                     end.Visited = true;
+
+                    #endregion
+                }
+                if (SingleKeyPress(kbState, Keys.D6) && start != null && end != null)
+                {
+                    solvedMaze.Clear();
+                    animationMode = 2;
+
+                    #region Setup For Depth Search Animation
+
+                    foreach (Tile item in maze)
+                    {
+                        if (item != null)
+                        {
+                            item.Visited = false;
+                            item.totalDistance = int.MaxValue;
+                        }
+                    }
+
+                    animationStack = new Stack<Tile>();
+
+                    animationStack.Push(start);
+                    start.Visited = true;
+                    #endregion
                 }
 
                 if (SingleKeyPress(kbState, Keys.V))
@@ -272,9 +299,18 @@ namespace Maze_Solver_Test
             }
             else if(animationMode == 1)
             {
-                //Loop while we have tiles in the stack
-                if (animationStack.Count != 0)
+                #region Dijikstra Animation Step By Step
+                animationTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if (animationTimer > 0.05)
                 {
+                    Debug.WriteLine(animationTimer);
+                }
+
+                //Loop while we have tiles in the stack
+                if (animationStack.Count != 0 && animationTimer > 0.025)
+                {
+                    animationTimer = 0;
+
                     Tile current = animationStack.Peek();
 
                     Tile nextMove = null;
@@ -326,7 +362,70 @@ namespace Maze_Solver_Test
                     }
 
                 }
+                #endregion
+            }
+            else if(animationMode == 2)
+            {
+                #region Depth Search Animation
+                animationTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+                if(animationTimer > 0.05)
+                {
+                    Debug.WriteLine(animationTimer);
+                }
 
+                if (animationStack.Count != 0 && animationTimer > 0.025)
+                {
+                    animationTimer = 0;
+
+                    Tile current = animationStack.Peek();
+
+                    List<int> choices = new List<int> { 1, 2, 3, 4 };
+
+                    Tile selection = null;
+
+                    while (choices.Count != 0 && selection == null)
+                    {
+                        int choice = choices[rng.Next(0, choices.Count)];
+                        //Check the neighbors of the current Tile, Put them on stack if valid
+                        if (IsTileValid(current.X + 1, current.Y) && choice == 1)
+                        {
+                            selection = maze[current.X + 1, current.Y];
+                        }
+                        else if (IsTileValid(current.X - 1, current.Y) && choice == 2)
+                        {
+                            selection = maze[current.X - 1, current.Y];
+                        }
+                        else if (IsTileValid(current.X, current.Y + 1) && choice == 3)
+                        {
+                            selection = maze[current.X, current.Y + 1];
+                        }
+                        else if (IsTileValid(current.X, current.Y - 1) && choice == 4)
+                        {
+                            selection = maze[current.X, current.Y - 1];
+                        }
+
+                        choices.Remove(choice);
+                    }
+
+                    //If there are no valid neighbors, back up to the previous tile
+                    if (selection == null)
+                    {
+                        animationStack.Pop();
+                    }
+                    else
+                    {
+                        animationStack.Push(selection);
+                        selection.Visited = true;
+                    }
+
+                    //If the current tile is the end, quit the search
+                    if (animationStack.Count == 0 || animationStack.Peek().type == TileType.End)
+                    {
+                        animationMode = -1;
+                    }
+
+                }
+                #endregion
             }
         }
 

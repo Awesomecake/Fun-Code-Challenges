@@ -48,7 +48,7 @@ namespace Maze_Solver_Test
                 Exit();
 
             // TODO: Add your update logic here
-            maze.Update();
+            maze.Update(gameTime);
 
             base.Update(gameTime);
         }
