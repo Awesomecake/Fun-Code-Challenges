@@ -195,7 +195,7 @@ namespace Maze_Solver_Test
                         }
                     }
 
-                    Tile currentNode = start;
+                    Tile currentNode = end;
 
                     currentNode.totalDistance = 0;
 
@@ -246,8 +246,8 @@ namespace Maze_Solver_Test
 
                     animationStack = new Stack<Tile>();
 
-                    animationStack.Push(end);
-                    end.Visited = true;
+                    animationStack.Push(start);
+                    start.Visited = true;
 
                     #endregion
                 }
@@ -350,12 +350,6 @@ namespace Maze_Solver_Test
             else if(animationMode == 1)
             {
                 #region Dijikstra Animation Step By Step
-                animationTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-                if (animationTimer > 0.05)
-                {
-                    Debug.WriteLine(animationTimer);
-                }
-
                 //Loop while we have tiles in the stack
                 if (animationStack.Count != 0 && animationTimer > 0.025)
                 {
@@ -406,7 +400,7 @@ namespace Maze_Solver_Test
                     }
 
                     //If the current tile is the end, quit the search
-                    if (animationStack.Count == 0 || animationStack.Peek().type == TileType.Start)
+                    if (animationStack.Count == 0 || animationStack.Peek().type == TileType.End)
                     {
                         animationMode = -1;
                     }
@@ -417,12 +411,6 @@ namespace Maze_Solver_Test
             else if(animationMode == 2)
             {
                 #region Depth Search Animation
-                animationTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
-                if(animationTimer > 0.05)
-                {
-                    Debug.WriteLine(animationTimer);
-                }
-
                 if (animationStack.Count != 0 && animationTimer > 0.025)
                 {
                     animationTimer = 0;
@@ -480,7 +468,6 @@ namespace Maze_Solver_Test
             else if(animationMode == 3)
             {
                 #region Maze Generator Animation
-                animationTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
 
                 //Loop while we have tiles in the stack
                 if (animationStack.Count != 0 && animationTimer > 0.025)
@@ -1342,8 +1329,10 @@ namespace Maze_Solver_Test
             return false;
         }
 
-        public void Draw(SpriteBatch sb)
+        public void Draw(SpriteBatch sb, GameTime gameTime)
         {
+            animationTimer += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
             foreach (Tile tile in maze)
             {
                 if (tile != null)

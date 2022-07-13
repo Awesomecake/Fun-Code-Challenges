@@ -26,7 +26,7 @@ namespace Maze_Solver_Test
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            CreateMaze(101, 101);
+            CreateMaze(51, 51);
 
             base.Initialize();
         }
@@ -70,7 +70,7 @@ namespace Maze_Solver_Test
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
 
-            maze.Draw(_spriteBatch);
+            maze.Draw(_spriteBatch, gameTime);
 
             _spriteBatch.End();
 
