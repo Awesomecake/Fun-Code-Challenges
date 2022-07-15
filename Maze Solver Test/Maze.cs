@@ -61,11 +61,11 @@ namespace Maze_Solver_Test
 
         public void Update(GameTime gameTime)
         {
+            MouseState currentState = Mouse.GetState();
+            KeyboardState kbState = Keyboard.GetState();
+
             if (animationMode == -1)
             {
-                MouseState currentState = Mouse.GetState();
-                KeyboardState kbState = Keyboard.GetState();
-
                 if (currentState.MiddleButton == ButtonState.Pressed)
                 {
                     builtAlternateItem = true;
@@ -73,8 +73,7 @@ namespace Maze_Solver_Test
 
                 if (currentState.LeftButton == ButtonState.Pressed)
                 {
-                    solvedMaze.Clear();
-                    ClearAnimation();
+                    ClearDrawings();
 
                     if (currentState.X / (screenWidth / width) >= width || currentState.X / (screenWidth / width) < 0)
                     {
@@ -90,7 +89,7 @@ namespace Maze_Solver_Test
                     if (builtAlternateItem)
                     {
                         builtAlternateItem = false;
-                        if (end != null)
+                        if (end != null && end.type == TileType.End)
                         {
                             end.type = TileType.Empty;
                         }
@@ -105,8 +104,7 @@ namespace Maze_Solver_Test
                 }
                 else if (currentState.RightButton == ButtonState.Pressed)
                 {
-                    solvedMaze.Clear();
-                    ClearAnimation();
+                    ClearDrawings();
 
                     if (currentState.X / (screenWidth / width) >= width || currentState.X / (screenWidth / width) < 0)
                     {
@@ -122,7 +120,7 @@ namespace Maze_Solver_Test
                     if (builtAlternateItem)
                     {
                         builtAlternateItem = false;
-                        if (start != null)
+                        if (start != null && start.type == TileType.Start)
                         {
                             start.type = TileType.Empty;
                         }
@@ -157,28 +155,28 @@ namespace Maze_Solver_Test
 
                 if (SingleKeyPress(kbState, Keys.D1) && start != null && end != null)
                 {
-                    ClearAnimation();
+                    ClearDrawings();
                     solvedMaze = DijikstraAlgorith();
                 }
                 else if (SingleKeyPress(kbState, Keys.D2) && start != null && end != null)
                 {
-                    ClearAnimation();
+                    ClearDrawings();
                     solvedMaze = DepthSearch();
                 }
                 else if (SingleKeyPress(kbState, Keys.D3) && start != null && end != null)
                 {
-                    ClearAnimation();
+                    ClearDrawings();
                     solvedMaze = DijikstraAlgorithScreenWrap();
                 }
                 else if (SingleKeyPress(kbState, Keys.D4) && start != null && end != null)
                 {
-                    ClearAnimation();
+                    ClearDrawings();
                     solvedMaze = DepthSearchScreenWrap();
                 }
 
                 else if (SingleKeyPress(kbState, Keys.D5) && start != null && end != null)
                 {
-                    solvedMaze.Clear();
+                    ClearDrawings();
                     animationMode = 1;
 
                     #region Setup For Dijikstra Animation
@@ -251,7 +249,7 @@ namespace Maze_Solver_Test
                 }
                 else if (SingleKeyPress(kbState, Keys.D6) && start != null && end != null)
                 {
-                    solvedMaze.Clear();
+                    ClearDrawings();
                     animationMode = 2;
 
                     #region Setup For Depth Search Animation
@@ -273,7 +271,7 @@ namespace Maze_Solver_Test
                 }
                 else if (SingleKeyPress(kbState, Keys.D7) && start != null && end != null)
                 {
-                    solvedMaze.Clear();
+                    ClearDrawings();
                     animationMode = 3;
 
                     #region Setup For Dijikstra Screen Wrap Animation
@@ -363,14 +361,29 @@ namespace Maze_Solver_Test
                 }
                 else if (SingleKeyPress(kbState, Keys.D8) && start != null && end != null)
                 {
-                    solvedMaze.Clear();
-                    animationMode = 3;
+                    ClearDrawings();
+                    animationMode = 4;
 
+                    #region Setup For Depth Search Screen Wrap Animation
+                    foreach (Tile item in maze)
+                    {
+                        if (item != null)
+                        {
+                            item.Visited = false;
+                            item.totalDistance = int.MaxValue;
+                        }
+                    }
+
+                    animationStack = new Stack<Tile>();
+
+                    animationStack.Push(start);
+                    start.Visited = true;
+                    #endregion
                 }
 
                 else if (SingleKeyPress(kbState, Keys.D0))
                 {
-                    solvedMaze.Clear();
+                    ClearDrawings();
                     animationMode = 5;
 
                     #region Setup For Maze Generation Animation
@@ -421,27 +434,30 @@ namespace Maze_Solver_Test
 
                 else if (SingleKeyPress(kbState, Keys.V))
                 {
-                    ClearAnimation();
+                    ClearDrawings();
                     MakeMaze(0);
                 }
                 else if (SingleKeyPress(kbState, Keys.B))
                 {
-                    ClearAnimation();
+                    ClearDrawings();
                     MakeMaze(1);
                 }
                 else if (SingleKeyPress(kbState, Keys.N))
                 {
-                    ClearAnimation();
+                    ClearDrawings();
                     MakeMaze(2);
                 }
                 else if (SingleKeyPress(kbState, Keys.M))
                 {
-                    ClearAnimation();
+                    ClearDrawings();
                     MakeMaze(3);
                 }
-
-                prevKBstate = kbState;
             }
+            else if(currentState.LeftButton == ButtonState.Pressed || currentState.RightButton == ButtonState.Pressed)
+            {
+                animationMode = -1;
+            }
+
             else if(animationMode == 1)
             {
                 #region Dijikstra Animation
@@ -543,7 +559,7 @@ namespace Maze_Solver_Test
                     //If there are no valid neighbors, back up to the previous tile
                     if (selection == null)
                     {
-                        animationStack.Pop();
+                        animationStack.Pop().totalDistance = 40;
                     }
                     else
                     {
@@ -639,6 +655,84 @@ namespace Maze_Solver_Test
                 }
                 #endregion
             }
+            else if (animationMode == 4)
+            {
+                #region Depth Search Screen Wrap Animation
+                if (animationStack.Count != 0 && animationTimer > 0.025)
+                {
+                    animationTimer = 0;
+
+                    Tile current = animationStack.Peek();
+
+                    List<int> choices = new List<int> { 1, 2, 3, 4 };
+
+                    Tile selection = null;
+
+                    while (choices.Count != 0 && selection == null)
+                    {
+                        int choice = choices[rng.Next(0, choices.Count)];
+                        //Check the neighbors of the current Tile, Put them on stack if valid
+
+                        //Check the neighbors of the current Tile, Put them on stack if valid
+                        if (IsTileValid(current.X + 1, current.Y) && choice == 1)
+                        {
+                            selection = maze[current.X + 1, current.Y];
+                        }
+                        else if (!InRange(current.X + 1, current.Y) && IsTileValid(current.X + 1 - width, current.Y) && choice == 1)
+                        {
+                            selection = maze[current.X + 1 - width, current.Y];
+                        }
+
+                        else if (IsTileValid(current.X - 1, current.Y) && choice == 2)
+                        {
+                            selection = maze[current.X - 1, current.Y];
+                        }
+                        else if (!InRange(current.X - 1, current.Y) && IsTileValid(current.X - 1 + width, current.Y) && choice == 2)
+                        {
+                            selection = maze[current.X - 1 + width, current.Y];
+                        }
+
+                        else if (IsTileValid(current.X, current.Y + 1) && choice == 3)
+                        {
+                            selection = maze[current.X, current.Y + 1];
+                        }
+                        else if (!InRange(current.X, current.Y + 1) && IsTileValid(current.X, current.Y + 1 - height) && choice == 3)
+                        {
+                            selection = maze[current.X, current.Y + 1 - height];
+                        }
+
+                        else if (IsTileValid(current.X, current.Y - 1) && choice == 4)
+                        {
+                            selection = maze[current.X, current.Y - 1];
+                        }
+                        else if (!InRange(current.X, current.Y - 1) && IsTileValid(current.X, current.Y - 1 + height) && choice == 4)
+                        {
+                            selection = maze[current.X, current.Y - 1 + height];
+                        }
+
+                        choices.Remove(choice);
+                    }
+
+                    //If there are no valid neighbors, back up to the previous tile
+                    if (selection == null)
+                    {
+                        animationStack.Pop().totalDistance = 40;
+                    }
+                    else
+                    {
+                        animationStack.Push(selection);
+                        selection.Visited = true;
+                    }
+
+
+                    //If the current tile is the end, quit the search
+                    if (animationStack.Count == 0 || animationStack.Peek().type == TileType.End)
+                    {
+                        animationMode = -1;
+                    }
+                }
+                #endregion
+            }
 
             else if(animationMode == 5)
             {
@@ -711,6 +805,8 @@ namespace Maze_Solver_Test
                 }
                 #endregion
             }
+
+            prevKBstate = kbState;
         }
 
         #region DijikstraAlgorith
@@ -1462,9 +1558,10 @@ namespace Maze_Solver_Test
             return false;
         }
 
-        private void ClearAnimation()
+        private void ClearDrawings()
         {
             animationStack.Clear();
+            solvedMaze.Clear();
         }
 
         public bool IsTileValid(int x, int y)
