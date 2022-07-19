@@ -26,7 +26,7 @@ namespace Maze_Solver_Test
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            CreateMaze(51, 51);
+            CreateMaze(200, 25, 20);
 
             base.Initialize();
         }
@@ -53,19 +53,19 @@ namespace Maze_Solver_Test
             base.Update(gameTime);
         }
 
-        public void CreateMaze(int x, int y)
+        public void CreateMaze(int x, int y, int pixelBuffer)
         {
             int size = MathHelper.Max(x, y);
-            maze = new Maze(x, y, (800/size)*x, (800/size)*y);
+            maze = new Maze(x, y, (800/size)*x, (800/size)*y, pixelBuffer);
 
-            _graphics.PreferredBackBufferWidth = (800 / size) * x;
-            _graphics.PreferredBackBufferHeight = (800 / size) * y;
+            _graphics.PreferredBackBufferWidth = (800 / size) * x + pixelBuffer*2;
+            _graphics.PreferredBackBufferHeight = (800 / size) * y + pixelBuffer*2;
             _graphics.ApplyChanges();
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.White);
+            GraphicsDevice.Clear(Color.LightBlue);
 
             // TODO: Add your drawing code here
             _spriteBatch.Begin();

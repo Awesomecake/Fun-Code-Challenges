@@ -19,6 +19,7 @@ namespace Maze_Solver_Test
 
         private int screenWidth;
         private int screenHeight;
+        private int pixelBuffer;
 
         private bool builtAlternateItem;
         private KeyboardState prevKBstate;
@@ -32,13 +33,14 @@ namespace Maze_Solver_Test
 
         Random rng;
 
-        public Maze(int x, int y, int width, int height)
+        public Maze(int x, int y, int width, int height, int buffer)
         {
             maze = new Tile[x, y];
             this.width = x;
             this.height = y;
             screenHeight = height;
             screenWidth = width;
+            pixelBuffer = buffer;
 
             rng = new Random();
 
@@ -56,7 +58,7 @@ namespace Maze_Solver_Test
 
         public Tile CreateSquare(TileType type, int x, int y)
         {
-            return maze[x, y] = new Tile(type, x, y,screenWidth/width,screenHeight/height);
+            return maze[x, y] = new Tile(type, x, y,screenWidth/width,screenHeight/height, pixelBuffer);
         }
 
         public void Update(GameTime gameTime)
@@ -71,20 +73,11 @@ namespace Maze_Solver_Test
                     builtAlternateItem = true;
                 }
 
-                if (currentState.LeftButton == ButtonState.Pressed)
+                if (currentState.LeftButton == ButtonState.Pressed && InRange(MouseTilePosX(currentState), MouseTilePosY(currentState)))
                 {
                     ClearDrawings();
 
-                    if (currentState.X / (screenWidth / width) >= width || currentState.X / (screenWidth / width) < 0)
-                    {
-                        return;
-                    }
-                    if (currentState.Y / (screenHeight / height) >= height || currentState.Y / (screenHeight / height) < 0)
-                    {
-                        return;
-                    }
-
-                    Tile newItem = maze[currentState.X / (screenWidth / width), currentState.Y / (screenHeight / height)];
+                    Tile newItem = maze[MouseTilePosX(currentState), MouseTilePosY(currentState)];
 
                     if (builtAlternateItem)
                     {
@@ -102,20 +95,11 @@ namespace Maze_Solver_Test
                         newItem.type = TileType.Wall;
                     }
                 }
-                else if (currentState.RightButton == ButtonState.Pressed)
+                else if (currentState.RightButton == ButtonState.Pressed && InRange(MouseTilePosX(currentState), MouseTilePosY(currentState)))
                 {
                     ClearDrawings();
 
-                    if (currentState.X / (screenWidth / width) >= width || currentState.X / (screenWidth / width) < 0)
-                    {
-                        return;
-                    }
-                    if (currentState.Y / (screenHeight / height) >= height || currentState.Y / (screenHeight / height) < 0)
-                    {
-                        return;
-                    }
-
-                    Tile newItem = maze[currentState.X / (screenWidth / width), currentState.Y / (screenHeight / height)];
+                    Tile newItem = maze[MouseTilePosX(currentState), MouseTilePosY(currentState)];
 
                     if (builtAlternateItem)
                     {
@@ -135,11 +119,11 @@ namespace Maze_Solver_Test
                 }
 
 
-                if (kbState.IsKeyDown(Keys.D) && !prevKBstate.IsKeyDown(Keys.D))
+                if (SingleKeyPress(kbState,Keys.D))
                 {
                     drawWeights = !drawWeights;
                 }
-                if (kbState.IsKeyDown(Keys.P) && !prevKBstate.IsKeyDown(Keys.P))
+                if (SingleKeyPress(kbState,Keys.P))
                 {
                     List<Tile> oldSolution;
 
@@ -182,14 +166,7 @@ namespace Maze_Solver_Test
                     #region Setup For Dijikstra Animation
                     //Animate DijikstraAlgorith
 
-                    foreach (Tile item in maze)
-                    {
-                        if (item != null)
-                        {
-                            item.Visited = false;
-                            item.totalDistance = int.MaxValue;
-                        }
-                    }
+                    ResetTilesVisitedAndDistance();
 
                     Tile currentNode = end;
 
@@ -254,14 +231,7 @@ namespace Maze_Solver_Test
 
                     #region Setup For Depth Search Animation
 
-                    foreach (Tile item in maze)
-                    {
-                        if (item != null)
-                        {
-                            item.Visited = false;
-                            item.totalDistance = int.MaxValue;
-                        }
-                    }
+                    ResetTilesVisitedAndDistance();
 
                     animationStack = new Stack<Tile>();
 
@@ -275,14 +245,7 @@ namespace Maze_Solver_Test
                     animationMode = 3;
 
                     #region Setup For Dijikstra Screen Wrap Animation
-                    foreach (Tile item in maze)
-                    {
-                        if (item != null)
-                        {
-                            item.Visited = false;
-                            item.totalDistance = int.MaxValue;
-                        }
-                    }
+                    ResetTilesVisitedAndDistance();
 
                     Tile currentNode = end;
 
@@ -365,14 +328,7 @@ namespace Maze_Solver_Test
                     animationMode = 4;
 
                     #region Setup For Depth Search Screen Wrap Animation
-                    foreach (Tile item in maze)
-                    {
-                        if (item != null)
-                        {
-                            item.Visited = false;
-                            item.totalDistance = int.MaxValue;
-                        }
-                    }
+                    ResetTilesVisitedAndDistance();
 
                     animationStack = new Stack<Tile>();
 
@@ -812,14 +768,7 @@ namespace Maze_Solver_Test
         #region DijikstraAlgorith
         public List<Tile> DijikstraAlgorith()
         {
-            foreach (Tile item in maze)
-            {
-                if (item != null)
-                {
-                    item.Visited = false;
-                    item.totalDistance = int.MaxValue;
-                }
-            }
+            ResetTilesVisitedAndDistance();
 
             Tile currentNode = end;
 
@@ -946,14 +895,7 @@ namespace Maze_Solver_Test
         #region DijikstraAlgorith Screen Wrap
         public List<Tile> DijikstraAlgorithScreenWrap()
         {
-            foreach (Tile item in maze)
-            {
-                if (item != null)
-                {
-                    item.Visited = false;
-                    item.totalDistance = int.MaxValue;
-                }
-            }
+            ResetTilesVisitedAndDistance();
 
             Tile currentNode = end;
 
@@ -1118,14 +1060,7 @@ namespace Maze_Solver_Test
         #region DepthSearch
         public List<Tile> DepthSearch()
         {
-            foreach (Tile item in maze)
-            {
-                if (item != null)
-                {
-                    item.Visited = false;
-                    item.totalDistance = int.MaxValue;
-                }
-            }
+            ResetTilesVisitedAndDistance();
 
             Stack<Tile> stack = new Stack<Tile>();
 
@@ -1200,14 +1135,7 @@ namespace Maze_Solver_Test
         #region BreadthSearch
         public List<Tile> BreadthSearch()
         {
-            foreach (Tile item in maze)
-            {
-                if (item != null)
-                {
-                    item.Visited = false;
-                    item.totalDistance = int.MaxValue;
-                }
-            }
+            ResetTilesVisitedAndDistance();
 
             Queue<Tile> queue = new Queue<Tile>();
 
@@ -1270,14 +1198,7 @@ namespace Maze_Solver_Test
         #region DepthSearch Screen Wrap
         public List<Tile> DepthSearchScreenWrap()
         {
-            foreach (Tile item in maze)
-            {
-                if (item != null)
-                {
-                    item.Visited = false;
-                    item.totalDistance = int.MaxValue;
-                }
-            }
+            ResetTilesVisitedAndDistance();
 
             Stack<Tile> stack = new Stack<Tile>();
 
@@ -1545,6 +1466,32 @@ namespace Maze_Solver_Test
                         path.RemoveRange(i+1, j - (i+1));
                         return;
                     }
+                }
+            }
+        }
+
+        private int MouseTilePosX(MouseState currentState)
+        {
+            if (currentState.X - pixelBuffer < 0)
+                return -1;
+            return (currentState.X - pixelBuffer) / (screenWidth / width);
+        }
+
+        private int MouseTilePosY(MouseState currentState)
+        {
+            if (currentState.Y - pixelBuffer< 0)
+                return -1;
+            return (currentState.Y - pixelBuffer) / (screenHeight / height);
+        }
+
+        private void ResetTilesVisitedAndDistance()
+        {
+            foreach (Tile item in maze)
+            {
+                if (item != null)
+                {
+                    item.Visited = false;
+                    item.totalDistance = int.MaxValue;
                 }
             }
         }

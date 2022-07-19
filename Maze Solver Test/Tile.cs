@@ -18,8 +18,11 @@ namespace Maze_Solver_Test
     {
         private int x;
         private int y;
-        int width;
-        int height;
+        private int width;
+        private int height;
+
+        private Rectangle Rect { get { return new Rectangle(x * width + pixelBuffer, y * height + pixelBuffer, width, height); } }
+        private int pixelBuffer;
 
         public int totalDistance = int.MaxValue;
         public TileType type;
@@ -27,10 +30,11 @@ namespace Maze_Solver_Test
         public int X { get { return x; } }
         public int Y { get { return y; } }
 
-        public Tile(TileType type, int x, int y,int width, int height)
+        public Tile(TileType type, int x, int y,int width, int height, int buffer)
         {
             this.x = x;
             this.y = y;
+            pixelBuffer = buffer;
 
             this.width = width;
             this.height = height;
@@ -39,36 +43,29 @@ namespace Maze_Solver_Test
 
         public void Draw(SpriteBatch sb, bool drawWeights)
         {
-            if (type == TileType.Wall)
+            switch (type)
             {
-                sb.Draw(Game1.blackSquare, new Rectangle(x * width, y * height, width, height), Color.White);
-            }
-            else if (type == TileType.Start)
-            {
-                sb.Draw(Game1.greenSquare, new Rectangle(x * width, y * height, width, height), Color.White);
-            }
-            else if (type == TileType.End)
-            {
-                sb.Draw(Game1.redSquare, new Rectangle(x * width, y * height, width, height), Color.White);
-            }
-            else if (type == TileType.Empty)
-            {
-                if (drawWeights)
-                {
-                    sb.Draw(Game1.whiteSquare, new Rectangle(x * width, y * height, width, height), new Color(totalDistance * 5, totalDistance * 5, totalDistance * 5));
-                }
-                else
-                {
-                    sb.Draw(Game1.whiteSquare, new Rectangle(x * width, y * height, width, height), Color.White);
-                }
+                case TileType.Wall: { sb.Draw(Game1.blackSquare, Rect, Color.White); break; }
+                case TileType.Start: { sb.Draw(Game1.greenSquare, Rect, Color.White); break; }
+                case TileType.End: { sb.Draw(Game1.redSquare, Rect, Color.White); break; }
+                case TileType.Empty:
+                    if (drawWeights)
+                    {
+                        sb.Draw(Game1.whiteSquare, Rect, new Color(totalDistance * 5, totalDistance * 5, totalDistance * 5));
+                    }
+                    else
+                    {
+                        sb.Draw(Game1.whiteSquare, Rect, Color.White);
+                    }
+                    break;
             }
         }
-        
+
         public void Draw(SpriteBatch sb, Color color, bool drawWeights)
         {
             if (type != TileType.End && type != TileType.Start)
             {
-                sb.Draw(Game1.whiteSquare, new Rectangle(x * width, y * height, width, height), color);
+                sb.Draw(Game1.whiteSquare, Rect, color);
             }
             else
             {
