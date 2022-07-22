@@ -14,6 +14,8 @@ namespace Maze_Solver_Test
         public static Texture2D redSquare;
         public static Texture2D whiteSquare;
 
+        public static SpriteFont arial;
+
         Maze maze;
 
         public Game1()
@@ -26,7 +28,7 @@ namespace Maze_Solver_Test
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            CreateMaze(200, 25, 20);
+            CreateMaze(5, 5, 20);
 
             base.Initialize();
         }
@@ -40,6 +42,8 @@ namespace Maze_Solver_Test
             redSquare = Content.Load<Texture2D>("redSquare");
             greenSquare = Content.Load<Texture2D>("greenSquare");
             whiteSquare = Content.Load<Texture2D>("WhiteTile");
+
+            arial = Content.Load<SpriteFont>("Arial");
         }
 
         protected override void Update(GameTime gameTime)
@@ -58,7 +62,7 @@ namespace Maze_Solver_Test
             int size = MathHelper.Max(x, y);
             maze = new Maze(x, y, (800/size)*x, (800/size)*y, pixelBuffer);
 
-            _graphics.PreferredBackBufferWidth = (800 / size) * x + pixelBuffer*2;
+            _graphics.PreferredBackBufferWidth = (800 / size) * x + pixelBuffer*2 + 100;
             _graphics.PreferredBackBufferHeight = (800 / size) * y + pixelBuffer*2;
             _graphics.ApplyChanges();
         }

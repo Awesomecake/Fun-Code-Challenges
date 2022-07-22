@@ -1574,6 +1574,9 @@ namespace Maze_Solver_Test
                     }
                 }
             }
+
+            Vector2 wordSize = Game1.arial.MeasureString("Width");
+            sb.DrawString(Game1.arial, "Width", new Vector2(screenWidth + pixelBuffer*2 + (int)(wordSize.X / 2), screenHeight/2+(int)(wordSize.Y/2)), Color.Black);
         }
     }
 }
