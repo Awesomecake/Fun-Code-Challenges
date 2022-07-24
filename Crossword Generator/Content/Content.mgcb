@@ -32,6 +32,13 @@
 /processorParam:TextureFormat=Color
 /build:CrosswordTile.png
 
+#begin SmallArial.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:SmallArial.spritefont
+
 #begin WhiteTile.png
 /importer:TextureImporter
 /processor:TextureProcessor

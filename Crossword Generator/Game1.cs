@@ -13,6 +13,7 @@ namespace Crossword_Generator
         public static Texture2D crosswordTile;
         public static Texture2D emptyTile;
         public static SpriteFont Arial;
+        public static SpriteFont SmallArial;
 
         public Game1()
         {
@@ -40,6 +41,7 @@ namespace Crossword_Generator
             crosswordTile = Content.Load<Texture2D>("CrosswordTile");
             emptyTile = Content.Load<Texture2D>("WhiteTile");
             Arial = Content.Load<SpriteFont>("Arial");
+            SmallArial = Content.Load<SpriteFont>("SmallArial");
         }
 
         protected override void Update(GameTime gameTime)

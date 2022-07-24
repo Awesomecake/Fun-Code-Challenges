@@ -68,7 +68,7 @@ namespace Crossword_Generator
                     GenerateCrossword();
                 }
 
-                System.Diagnostics.Debug.WriteLine(trueListOfWords.Count - words.Count);
+                System.Diagnostics.Debug.WriteLine(trueListOfWords.Count - words.Count + "/" + trueListOfWords.Count);
             }
 
             if (SingleKeyPress(kbState, Keys.D))
@@ -108,6 +108,17 @@ namespace Crossword_Generator
 
                 loop++;
             }
+
+
+            int wordNumLabel = 1;
+            for (int j = 0; j < crossword.GetLength(1); j++)
+            {
+                for (int i = 0; i < crossword.GetLength(0); i++)
+                {
+                    if(crossword[i,j].NumLabel == -1)
+                        crossword[i, j].NumLabel = wordNumLabel++;
+                }
+            }
         }
 
         public void Draw(SpriteBatch sb)
@@ -138,6 +149,10 @@ namespace Crossword_Generator
 
             for (int i = 0; i < word.Length; i++)
             {
+                if(i == 0)
+                {
+                    crossword[xLoc, yLoc].NumLabel = -1;
+                }
                 crossword[xLoc + i, yLoc].Letter = word[i];
             }
 
@@ -168,6 +183,10 @@ namespace Crossword_Generator
 
             for (int i = 0; i < word.Length; i++)
             {
+                if (i == 0)
+                {
+                    crossword[xLoc, yLoc].NumLabel = -1;
+                }
                 crossword[xLoc, yLoc+i].Letter = word[i];
             }
 
@@ -205,6 +224,10 @@ namespace Crossword_Generator
 
             for (int i = 0; i < word.Length; i++)
             {
+                if (i == 0)
+                {
+                    crossword[xLoc, yLoc].NumLabel = -1;
+                }
                 crossword[xLoc+i, yLoc].Letter = word[i];
             }
 
