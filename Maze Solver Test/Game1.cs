@@ -6,7 +6,7 @@ namespace Maze_Solver_Test
 {
     public class Game1 : Game
     {
-        private GraphicsDeviceManager _graphics;
+        public static GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
         public static Texture2D blackSquare;
@@ -28,7 +28,7 @@ namespace Maze_Solver_Test
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            CreateMaze(5, 5, 20);
+            CreateMaze(25, 25, 20);
 
             base.Initialize();
         }

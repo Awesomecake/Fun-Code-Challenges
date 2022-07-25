@@ -31,6 +31,10 @@ namespace Maze_Solver_Test
         private Stack<Tile> animationStack;
         private float animationTimer = 0;
 
+        private bool writingText;
+        private string writtenText = "";
+        private Rectangle WidthTextRect { get {return new Rectangle(screenWidth + (int)(pixelBuffer * 1.5), screenHeight / 2 + 12, 100, 50); } }
+
         Random rng;
 
         public Maze(int x, int y, int width, int height, int buffer)
@@ -41,6 +45,8 @@ namespace Maze_Solver_Test
             screenHeight = height;
             screenWidth = width;
             pixelBuffer = buffer;
+
+            writtenText = x.ToString();
 
             rng = new Random();
 
@@ -117,13 +123,26 @@ namespace Maze_Solver_Test
                         newItem.type = TileType.Empty;
                     }
                 }
+                else if(currentState.LeftButton == ButtonState.Pressed && MouseInsideRect(currentState, WidthTextRect))
+                {
+                    writingText = true;
+                }
 
+                if (!MouseInsideRect(currentState, WidthTextRect))
+                {
+                    writingText = false;
+                }
 
-                if (SingleKeyPress(kbState,Keys.D))
+                if (SingleKeyPress(kbState, Keys.D))
                 {
                     drawWeights = !drawWeights;
                 }
-                if (SingleKeyPress(kbState,Keys.P))
+                if (SingleKeyPress(kbState, Keys.Z))
+                {
+                    writingText = !writingText;
+                    writtenText = width.ToString();
+                }
+                if (SingleKeyPress(kbState, Keys.P))
                 {
                     List<Tile> oldSolution;
 
@@ -137,258 +156,333 @@ namespace Maze_Solver_Test
                     } while (oldSolution.Count != solvedMaze.Count);
                 }
 
-                if (SingleKeyPress(kbState, Keys.D1) && start != null && end != null)
+                if (!writingText)
                 {
-                    ClearDrawings();
-                    solvedMaze = DijikstraAlgorith();
-                }
-                else if (SingleKeyPress(kbState, Keys.D2) && start != null && end != null)
-                {
-                    ClearDrawings();
-                    solvedMaze = DepthSearch();
-                }
-                else if (SingleKeyPress(kbState, Keys.D3) && start != null && end != null)
-                {
-                    ClearDrawings();
-                    solvedMaze = DijikstraAlgorithScreenWrap();
-                }
-                else if (SingleKeyPress(kbState, Keys.D4) && start != null && end != null)
-                {
-                    ClearDrawings();
-                    solvedMaze = DepthSearchScreenWrap();
-                }
-
-                else if (SingleKeyPress(kbState, Keys.D5) && start != null && end != null)
-                {
-                    ClearDrawings();
-                    animationMode = 1;
-
-                    #region Setup For Dijikstra Animation
-                    //Animate DijikstraAlgorith
-
-                    ResetTilesVisitedAndDistance();
-
-                    Tile currentNode = end;
-
-                    currentNode.totalDistance = 0;
-
-                    while (currentNode != null)
+                    if (SingleKeyPress(kbState, Keys.D1) && start != null && end != null)
                     {
-                        currentNode.Visited = true;
+                        ClearDrawings();
+                        solvedMaze = DijikstraAlgorith();
+                    }
+                    else if (SingleKeyPress(kbState, Keys.D2) && start != null && end != null)
+                    {
+                        ClearDrawings();
+                        solvedMaze = DepthSearch();
+                    }
+                    else if (SingleKeyPress(kbState, Keys.D3) && start != null && end != null)
+                    {
+                        ClearDrawings();
+                        solvedMaze = DijikstraAlgorithScreenWrap();
+                    }
+                    else if (SingleKeyPress(kbState, Keys.D4) && start != null && end != null)
+                    {
+                        ClearDrawings();
+                        solvedMaze = DepthSearchScreenWrap();
+                    }
 
-                        if (IsTileValid(currentNode.X + 1, currentNode.Y) && currentNode.totalDistance + 1 < maze[currentNode.X + 1, currentNode.Y].totalDistance)
+                    else if (SingleKeyPress(kbState, Keys.D5) && start != null && end != null)
+                    {
+                        ClearDrawings();
+                        animationMode = 1;
+
+                        #region Setup For Dijikstra Animation
+                        //Animate DijikstraAlgorith
+
+                        ResetTilesVisitedAndDistance();
+
+                        Tile currentNode = end;
+
+                        currentNode.totalDistance = 0;
+
+                        while (currentNode != null)
                         {
-                            maze[currentNode.X + 1, currentNode.Y].totalDistance = currentNode.totalDistance + 1;
-                        }
-                        if (IsTileValid(currentNode.X - 1, currentNode.Y) && currentNode.totalDistance + 1 < maze[currentNode.X - 1, currentNode.Y].totalDistance)
-                        {
-                            maze[currentNode.X - 1, currentNode.Y].totalDistance = currentNode.totalDistance + 1;
-                        }
-                        if (IsTileValid(currentNode.X, currentNode.Y + 1) && currentNode.totalDistance + 1 < maze[currentNode.X, currentNode.Y + 1].totalDistance)
-                        {
-                            maze[currentNode.X, currentNode.Y + 1].totalDistance = currentNode.totalDistance + 1;
-                        }
-                        if (IsTileValid(currentNode.X, currentNode.Y - 1) && currentNode.totalDistance + 1 < maze[currentNode.X, currentNode.Y - 1].totalDistance)
-                        {
-                            maze[currentNode.X, currentNode.Y - 1].totalDistance = currentNode.totalDistance + 1;
+                            currentNode.Visited = true;
+
+                            if (IsTileValid(currentNode.X + 1, currentNode.Y) && currentNode.totalDistance + 1 < maze[currentNode.X + 1, currentNode.Y].totalDistance)
+                            {
+                                maze[currentNode.X + 1, currentNode.Y].totalDistance = currentNode.totalDistance + 1;
+                            }
+                            if (IsTileValid(currentNode.X - 1, currentNode.Y) && currentNode.totalDistance + 1 < maze[currentNode.X - 1, currentNode.Y].totalDistance)
+                            {
+                                maze[currentNode.X - 1, currentNode.Y].totalDistance = currentNode.totalDistance + 1;
+                            }
+                            if (IsTileValid(currentNode.X, currentNode.Y + 1) && currentNode.totalDistance + 1 < maze[currentNode.X, currentNode.Y + 1].totalDistance)
+                            {
+                                maze[currentNode.X, currentNode.Y + 1].totalDistance = currentNode.totalDistance + 1;
+                            }
+                            if (IsTileValid(currentNode.X, currentNode.Y - 1) && currentNode.totalDistance + 1 < maze[currentNode.X, currentNode.Y - 1].totalDistance)
+                            {
+                                maze[currentNode.X, currentNode.Y - 1].totalDistance = currentNode.totalDistance + 1;
+                            }
+
+                            Tile newCurrent = null;
+
+                            for (int i = 0; i < maze.GetLength(0); i++)
+                            {
+                                for (int j = 0; j < maze.GetLength(1); j++)
+                                {
+                                    if (!maze[i, j].Visited && (newCurrent == null || maze[i, j].totalDistance < newCurrent.totalDistance))
+                                    {
+                                        newCurrent = maze[i, j];
+                                    }
+                                }
+                            }
+
+                            currentNode = newCurrent;
                         }
 
-                        Tile newCurrent = null;
+                        foreach (Tile item in maze)
+                        {
+                            if (item != null)
+                            {
+                                item.Visited = false;
+                            }
+                        }
 
+                        animationStack = new Stack<Tile>();
+
+                        animationStack.Push(start);
+                        start.Visited = true;
+
+                        #endregion
+                    }
+                    else if (SingleKeyPress(kbState, Keys.D6) && start != null && end != null)
+                    {
+                        ClearDrawings();
+                        animationMode = 2;
+
+                        #region Setup For Depth Search Animation
+
+                        ResetTilesVisitedAndDistance();
+
+                        animationStack = new Stack<Tile>();
+
+                        animationStack.Push(start);
+                        start.Visited = true;
+                        #endregion
+                    }
+                    else if (SingleKeyPress(kbState, Keys.D7) && start != null && end != null)
+                    {
+                        ClearDrawings();
+                        animationMode = 3;
+
+                        #region Setup For Dijikstra Screen Wrap Animation
+                        ResetTilesVisitedAndDistance();
+
+                        Tile currentNode = end;
+
+                        currentNode.totalDistance = 0;
+
+                        while (currentNode != null)
+                        {
+                            currentNode.Visited = true;
+
+                            if (IsTileValid(currentNode.X + 1, currentNode.Y) && currentNode.totalDistance + 1 < maze[currentNode.X + 1, currentNode.Y].totalDistance)
+                            {
+                                maze[currentNode.X + 1, currentNode.Y].totalDistance = currentNode.totalDistance + 1;
+                            }
+                            else if (!InRange(currentNode.X + 1, currentNode.Y) && IsTileValid(currentNode.X + 1 - width, currentNode.Y) && currentNode.totalDistance + 1 < maze[currentNode.X + 1 - width, currentNode.Y].totalDistance)
+                            {
+                                maze[currentNode.X + 1 - width, currentNode.Y].totalDistance = currentNode.totalDistance + 1;
+                            }
+
+                            if (IsTileValid(currentNode.X - 1, currentNode.Y) && currentNode.totalDistance + 1 < maze[currentNode.X - 1, currentNode.Y].totalDistance)
+                            {
+                                maze[currentNode.X - 1, currentNode.Y].totalDistance = currentNode.totalDistance + 1;
+                            }
+                            else if (!InRange(currentNode.X - 1, currentNode.Y) && IsTileValid(currentNode.X - 1 + width, currentNode.Y) && currentNode.totalDistance + 1 < maze[currentNode.X - 1 + width, currentNode.Y].totalDistance)
+                            {
+                                maze[currentNode.X - 1 + width, currentNode.Y].totalDistance = currentNode.totalDistance + 1;
+                            }
+
+                            if (IsTileValid(currentNode.X, currentNode.Y + 1) && currentNode.totalDistance + 1 < maze[currentNode.X, currentNode.Y + 1].totalDistance)
+                            {
+                                maze[currentNode.X, currentNode.Y + 1].totalDistance = currentNode.totalDistance + 1;
+                            }
+                            else if (!InRange(currentNode.X, currentNode.Y + 1) && IsTileValid(currentNode.X, currentNode.Y + 1 - height) && currentNode.totalDistance + 1 < maze[currentNode.X, currentNode.Y + 1 - height].totalDistance)
+                            {
+                                maze[currentNode.X, currentNode.Y + 1 - height].totalDistance = currentNode.totalDistance + 1;
+                            }
+
+                            if (IsTileValid(currentNode.X, currentNode.Y - 1) && currentNode.totalDistance + 1 < maze[currentNode.X, currentNode.Y - 1].totalDistance)
+                            {
+                                maze[currentNode.X, currentNode.Y - 1].totalDistance = currentNode.totalDistance + 1;
+                            }
+                            else if (!InRange(currentNode.X, currentNode.Y - 1) && IsTileValid(currentNode.X, currentNode.Y - 1 + height) && currentNode.totalDistance + 1 < maze[currentNode.X, currentNode.Y - 1 + height].totalDistance)
+                            {
+                                maze[currentNode.X, currentNode.Y - 1 + height].totalDistance = currentNode.totalDistance + 1;
+                            }
+
+                            Tile newCurrent = null;
+
+                            for (int i = 0; i < maze.GetLength(0); i++)
+                            {
+                                for (int j = 0; j < maze.GetLength(1); j++)
+                                {
+                                    if (!maze[i, j].Visited && (newCurrent == null || maze[i, j].totalDistance < newCurrent.totalDistance))
+                                    {
+                                        newCurrent = maze[i, j];
+                                    }
+                                }
+                            }
+
+                            currentNode = newCurrent;
+                        }
+
+                        foreach (Tile item in maze)
+                        {
+                            if (item != null)
+                            {
+                                item.Visited = false;
+                            }
+                        }
+
+                        animationStack = new Stack<Tile>();
+
+                        animationStack.Push(start);
+                        start.Visited = true;
+                        #endregion
+
+                    }
+                    else if (SingleKeyPress(kbState, Keys.D8) && start != null && end != null)
+                    {
+                        ClearDrawings();
+                        animationMode = 4;
+
+                        #region Setup For Depth Search Screen Wrap Animation
+                        ResetTilesVisitedAndDistance();
+
+                        animationStack = new Stack<Tile>();
+
+                        animationStack.Push(start);
+                        start.Visited = true;
+                        #endregion
+                    }
+
+                    else if (SingleKeyPress(kbState, Keys.D0))
+                    {
+                        ClearDrawings();
+                        animationMode = 5;
+
+                        #region Setup For Maze Generation Animation
                         for (int i = 0; i < maze.GetLength(0); i++)
                         {
                             for (int j = 0; j < maze.GetLength(1); j++)
                             {
-                                if (!maze[i, j].Visited && (newCurrent == null || maze[i, j].totalDistance < newCurrent.totalDistance))
-                                {
-                                    newCurrent = maze[i, j];
-                                }
+                                CreateSquare(TileType.Wall, i, j);
                             }
                         }
 
-                        currentNode = newCurrent;
-                    }
+                        animationStack = new Stack<Tile>();
 
-                    foreach (Tile item in maze)
-                    {
-                        if (item != null)
+                        int xStart = rng.Next(0, width);
+                        int yStart = rng.Next(0, height);
+
+                        if (xStart % 2 == 0)
                         {
-                            item.Visited = false;
-                        }
-                    }
-
-                    animationStack = new Stack<Tile>();
-
-                    animationStack.Push(start);
-                    start.Visited = true;
-
-                    #endregion
-                }
-                else if (SingleKeyPress(kbState, Keys.D6) && start != null && end != null)
-                {
-                    ClearDrawings();
-                    animationMode = 2;
-
-                    #region Setup For Depth Search Animation
-
-                    ResetTilesVisitedAndDistance();
-
-                    animationStack = new Stack<Tile>();
-
-                    animationStack.Push(start);
-                    start.Visited = true;
-                    #endregion
-                }
-                else if (SingleKeyPress(kbState, Keys.D7) && start != null && end != null)
-                {
-                    ClearDrawings();
-                    animationMode = 3;
-
-                    #region Setup For Dijikstra Screen Wrap Animation
-                    ResetTilesVisitedAndDistance();
-
-                    Tile currentNode = end;
-
-                    currentNode.totalDistance = 0;
-
-                    while (currentNode != null)
-                    {
-                        currentNode.Visited = true;
-
-                        if (IsTileValid(currentNode.X + 1, currentNode.Y) && currentNode.totalDistance + 1 < maze[currentNode.X + 1, currentNode.Y].totalDistance)
-                        {
-                            maze[currentNode.X + 1, currentNode.Y].totalDistance = currentNode.totalDistance + 1;
-                        }
-                        else if (!InRange(currentNode.X + 1, currentNode.Y) && IsTileValid(currentNode.X + 1 - width, currentNode.Y) && currentNode.totalDistance + 1 < maze[currentNode.X + 1 - width, currentNode.Y].totalDistance)
-                        {
-                            maze[currentNode.X + 1 - width, currentNode.Y].totalDistance = currentNode.totalDistance + 1;
-                        }
-
-                        if (IsTileValid(currentNode.X - 1, currentNode.Y) && currentNode.totalDistance + 1 < maze[currentNode.X - 1, currentNode.Y].totalDistance)
-                        {
-                            maze[currentNode.X - 1, currentNode.Y].totalDistance = currentNode.totalDistance + 1;
-                        }
-                        else if (!InRange(currentNode.X - 1, currentNode.Y) && IsTileValid(currentNode.X - 1 + width, currentNode.Y) && currentNode.totalDistance + 1 < maze[currentNode.X - 1 + width, currentNode.Y].totalDistance)
-                        {
-                            maze[currentNode.X - 1 + width, currentNode.Y].totalDistance = currentNode.totalDistance + 1;
-                        }
-
-                        if (IsTileValid(currentNode.X, currentNode.Y + 1) && currentNode.totalDistance + 1 < maze[currentNode.X, currentNode.Y + 1].totalDistance)
-                        {
-                            maze[currentNode.X, currentNode.Y + 1].totalDistance = currentNode.totalDistance + 1;
-                        }
-                        else if (!InRange(currentNode.X, currentNode.Y + 1) && IsTileValid(currentNode.X, currentNode.Y + 1 - height) && currentNode.totalDistance + 1 < maze[currentNode.X, currentNode.Y + 1 - height].totalDistance)
-                        {
-                            maze[currentNode.X, currentNode.Y + 1 - height].totalDistance = currentNode.totalDistance + 1;
-                        }
-
-                        if (IsTileValid(currentNode.X, currentNode.Y - 1) && currentNode.totalDistance + 1 < maze[currentNode.X, currentNode.Y - 1].totalDistance)
-                        {
-                            maze[currentNode.X, currentNode.Y - 1].totalDistance = currentNode.totalDistance + 1;
-                        }
-                        else if (!InRange(currentNode.X, currentNode.Y - 1) && IsTileValid(currentNode.X, currentNode.Y - 1 + height) && currentNode.totalDistance + 1 < maze[currentNode.X, currentNode.Y - 1 + height].totalDistance)
-                        {
-                            maze[currentNode.X, currentNode.Y - 1 + height].totalDistance = currentNode.totalDistance + 1;
-                        }
-
-                        Tile newCurrent = null;
-
-                        for (int i = 0; i < maze.GetLength(0); i++)
-                        {
-                            for (int j = 0; j < maze.GetLength(1); j++)
+                            if (xStart + 1 < width)
                             {
-                                if (!maze[i, j].Visited && (newCurrent == null || maze[i, j].totalDistance < newCurrent.totalDistance))
-                                {
-                                    newCurrent = maze[i, j];
-                                }
+                                xStart++;
+                            }
+                            else
+                            {
+                                xStart--;
                             }
                         }
 
-                        currentNode = newCurrent;
-                    }
-
-                    foreach (Tile item in maze)
-                    {
-                        if (item != null)
+                        if (yStart % 2 == 0)
                         {
-                            item.Visited = false;
+                            if (yStart + 1 < height)
+                            {
+                                yStart++;
+                            }
+                            else
+                            {
+                                yStart--;
+                            }
                         }
+
+                        animationStack.Push(maze[xStart, yStart]);
+
+                        //Commenting out allows for loop to exist at start point
+                        maze[xStart, yStart].Visited = true;
+                        maze[xStart, yStart].type = TileType.Empty;
+                        #endregion
                     }
-
-                    animationStack = new Stack<Tile>();
-
-                    animationStack.Push(start);
-                    start.Visited = true;
-                    #endregion
-
                 }
-                else if (SingleKeyPress(kbState, Keys.D8) && start != null && end != null)
+                else if (writingText && kbState.GetPressedKeys().Length != 0)
                 {
-                    ClearDrawings();
-                    animationMode = 4;
+                    foreach (Keys item in kbState.GetPressedKeys())
+                    {
+                        switch (item)
+                        {
+                            case Keys.D0:
+                            case Keys.D1:
+                            case Keys.D2:
+                            case Keys.D3:
+                            case Keys.D4:
+                            case Keys.D5:
+                            case Keys.D6:
+                            case Keys.D7:
+                            case Keys.D8:
+                            case Keys.D9:
+                            case Keys.NumPad0:
+                            case Keys.NumPad1:
+                            case Keys.NumPad2:
+                            case Keys.NumPad3:
+                            case Keys.NumPad4:
+                            case Keys.NumPad5:
+                            case Keys.NumPad6:
+                            case Keys.NumPad7:
+                            case Keys.NumPad8:
+                            case Keys.NumPad9:
+                                if (SingleKeyPress(kbState, item) && writtenText.Length < 3)
+                                {
+                                    writtenText += item.ToString().Replace("D", "");
+                                }
+                                break;
+                            case Keys.Back:
+                                if(SingleKeyPress(kbState,item) && writtenText.Length > 0)
+                                {
+                                    writtenText = writtenText.Substring(0, writtenText.Length - 1);
+                                }
+                                break;
+                            case Keys.Enter:
+                                int result;
+                                if(SingleKeyPress(kbState,item) && int.TryParse(writtenText,out result))
+                                {
+                                    if (result < 1 || result > 300)
+                                        break;
 
-                    #region Setup For Depth Search Screen Wrap Animation
-                    ResetTilesVisitedAndDistance();
+                                    width = int.Parse(writtenText);
 
-                    animationStack = new Stack<Tile>();
+                                    int size = MathHelper.Max(width, height);
 
-                    animationStack.Push(start);
-                    start.Visited = true;
-                    #endregion
+                                    screenWidth = (800 / size) * width;
+                                    screenHeight = (800 / size) * height;
+
+
+                                    maze = new Tile[width, height];
+
+                                    for (int i = 0; i < maze.GetLength(0); i++)
+                                    {
+                                        for (int j = 0; j < maze.GetLength(1); j++)
+                                        {
+                                            CreateSquare(TileType.Empty, i, j);
+                                        }
+                                    }
+
+                                    Game1._graphics.PreferredBackBufferWidth = (800 / size) * width + pixelBuffer * 2 + 100;
+                                    Game1._graphics.PreferredBackBufferHeight = (800 / size) * height + pixelBuffer * 2;
+                                    Game1._graphics.ApplyChanges();
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+                    }
                 }
 
-                else if (SingleKeyPress(kbState, Keys.D0))
-                {
-                    ClearDrawings();
-                    animationMode = 5;
-
-                    #region Setup For Maze Generation Animation
-                    for (int i = 0; i < maze.GetLength(0); i++)
-                    {
-                        for (int j = 0; j < maze.GetLength(1); j++)
-                        {
-                            CreateSquare(TileType.Wall, i, j);
-                        }
-                    }
-
-                    animationStack = new Stack<Tile>();
-
-                    int xStart = rng.Next(0, width);
-                    int yStart = rng.Next(0, height);
-
-                    if (xStart % 2 == 0)
-                    {
-                        if (xStart + 1 < width)
-                        {
-                            xStart++;
-                        }
-                        else
-                        {
-                            xStart--;
-                        }
-                    }
-
-                    if (yStart % 2 == 0)
-                    {
-                        if (yStart + 1 < height)
-                        {
-                            yStart++;
-                        }
-                        else
-                        {
-                            yStart--;
-                        }
-                    }
-
-                    animationStack.Push(maze[xStart, yStart]);
-
-                    //Commenting out allows for loop to exist at start point
-                    maze[xStart, yStart].Visited = true;
-                    maze[xStart, yStart].type = TileType.Empty;
-                    #endregion
-                }
-
-                else if (SingleKeyPress(kbState, Keys.V))
+                if (SingleKeyPress(kbState, Keys.V))
                 {
                     ClearDrawings();
                     MakeMaze(0);
@@ -1505,6 +1599,18 @@ namespace Maze_Solver_Test
             return false;
         }
 
+        public bool MouseInsideRect(MouseState mouse, Rectangle rect)
+        {
+            if(mouse.X > rect.X && mouse.X < rect.X + rect.Width)
+            {
+                if(mouse.Y > rect.Y && mouse.Y < rect.Y + rect.Height)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private void ClearDrawings()
         {
             animationStack.Clear();
@@ -1574,9 +1680,13 @@ namespace Maze_Solver_Test
                     }
                 }
             }
+            Vector2 wordSize = Game1.arial.MeasureString(writtenText);
 
-            Vector2 wordSize = Game1.arial.MeasureString("Width");
-            sb.DrawString(Game1.arial, "Width", new Vector2(screenWidth + pixelBuffer*2 + (int)(wordSize.X / 2), screenHeight/2+(int)(wordSize.Y/2)), Color.Black);
+            if(!writingText)
+                sb.Draw(Game1.whiteSquare, WidthTextRect, Color.Beige);
+            else
+                sb.Draw(Game1.whiteSquare, WidthTextRect, Color.LightGreen);
+            sb.DrawString(Game1.arial, writtenText, new Vector2(screenWidth + (int)(pixelBuffer*1.5) + 50 - (int)(wordSize.X/2), screenHeight/2+(int)(wordSize.Y/2)), Color.Black);
         }
     }
 }
