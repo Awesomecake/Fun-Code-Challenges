@@ -408,6 +408,27 @@ namespace Maze_Solver_Test
                         maze[xStart, yStart].type = TileType.Empty;
                         #endregion
                     }
+
+                    if (SingleKeyPress(kbState, Keys.V))
+                    {
+                        ClearDrawings();
+                        MakeMaze(0);
+                    }
+                    else if (SingleKeyPress(kbState, Keys.B))
+                    {
+                        ClearDrawings();
+                        MakeMaze(1);
+                    }
+                    else if (SingleKeyPress(kbState, Keys.N))
+                    {
+                        ClearDrawings();
+                        MakeMaze(2);
+                    }
+                    else if (SingleKeyPress(kbState, Keys.M))
+                    {
+                        ClearDrawings();
+                        MakeMaze(3);
+                    }
                 }
                 else if (writingText && kbState.GetPressedKeys().Length != 0)
                 {
@@ -480,27 +501,6 @@ namespace Maze_Solver_Test
                                 break;
                         }
                     }
-                }
-
-                if (SingleKeyPress(kbState, Keys.V))
-                {
-                    ClearDrawings();
-                    MakeMaze(0);
-                }
-                else if (SingleKeyPress(kbState, Keys.B))
-                {
-                    ClearDrawings();
-                    MakeMaze(1);
-                }
-                else if (SingleKeyPress(kbState, Keys.N))
-                {
-                    ClearDrawings();
-                    MakeMaze(2);
-                }
-                else if (SingleKeyPress(kbState, Keys.M))
-                {
-                    ClearDrawings();
-                    MakeMaze(3);
                 }
             }
             else if(currentState.LeftButton == ButtonState.Pressed || currentState.RightButton == ButtonState.Pressed)
