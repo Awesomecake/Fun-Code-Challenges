@@ -25,7 +25,7 @@ namespace Crossword_Generator
             crossword = new Tile[25, 25];
 
             trueListOfWords = new List<string>();
-            trueListOfWords.Add("baby");
+            /*trueListOfWords.Add("baby");
             trueListOfWords.Add("bunny");
             trueListOfWords.Add("calf");
             trueListOfWords.Add("chick");
@@ -41,7 +41,20 @@ namespace Crossword_Generator
             trueListOfWords.Add("kitten");
             trueListOfWords.Add("lamb");
             trueListOfWords.Add("piglet");
-            trueListOfWords.Add("puppy");
+            trueListOfWords.Add("puppy");*/
+
+            trueListOfWords.Add("JANUARY");
+            trueListOfWords.Add("FEBRUARY");
+            trueListOfWords.Add("MARCH");
+            trueListOfWords.Add("APRIL");
+            trueListOfWords.Add("MAY");
+            trueListOfWords.Add("JUNE");
+            trueListOfWords.Add("JULY");
+            trueListOfWords.Add("AUGUST");
+            trueListOfWords.Add("SEPTEMBER");
+            trueListOfWords.Add("OCTOBER");
+            trueListOfWords.Add("NOVEMBER");
+            trueListOfWords.Add("DECEMBER");
 
 
 
