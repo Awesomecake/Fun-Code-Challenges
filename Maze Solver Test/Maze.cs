@@ -11,8 +11,8 @@ namespace Maze_Solver_Test
     class Maze
     {
         Tile[,] maze;
-        private Tile start;
-        private Tile end;
+        private Tile start = null;
+        private Tile end = null;
 
         private int width;
         private int height;
@@ -36,8 +36,11 @@ namespace Maze_Solver_Test
         private string widthSizeTextBox;
         private string heightSizeTextBox;
 
-        private Rectangle WidthTextRect { get {return new Rectangle(screenWidth + (int)(pixelBuffer * 1.5), 2*screenHeight / 3 + 12, 100, 50); } }
-        private Rectangle HeightTextRect { get { return new Rectangle(screenWidth + (int)(pixelBuffer * 1.5), screenHeight / 3 + 12, 100, 50); } }
+        private int heightOffset;
+
+        private Rectangle WidthTextRect { get {return new Rectangle(screenWidth + (int)(pixelBuffer * 1.5), pixelBuffer + 150, 100, 50); } }
+        private Rectangle HeightTextRect { get { return new Rectangle(screenWidth + (int)(pixelBuffer * 1.5), pixelBuffer+50, 100, 50); } }
+        private Rectangle SizeChangeConfirm { get { return new Rectangle(screenWidth + (int)(pixelBuffer * 1.5), screenHeight + heightOffset - 50 + pixelBuffer, 100, 50); } }
 
         Random rng;
 
@@ -69,7 +72,7 @@ namespace Maze_Solver_Test
 
         public Tile CreateSquare(TileType type, int x, int y)
         {
-            return maze[x, y] = new Tile(type, x, y,screenWidth/width,screenHeight/height, pixelBuffer);
+            return maze[x, y] = new Tile(type, x, y,screenWidth/width,screenHeight/height, pixelBuffer,heightOffset);
         }
 
         public void Update(GameTime gameTime)
@@ -138,6 +141,45 @@ namespace Maze_Solver_Test
                     {
                         writingHeightSize = true;
                         heightSizeTextBox = "";
+                    }
+                    else if(currentState.LeftButton == ButtonState.Pressed && MouseInsideRect(currentState, SizeChangeConfirm))
+                    {
+                        int widthResult;
+                        int heightResult;
+                        if (int.TryParse(widthSizeTextBox, out widthResult) && widthResult < 300 && widthResult > 1)
+                        {
+                            if (int.TryParse(heightSizeTextBox, out heightResult) && heightResult < 300 && heightResult > 1)
+                            {
+                                width = widthResult;
+                                height = heightResult;
+
+                                int size = MathHelper.Max(width, height);
+
+                                screenWidth = (800 / size) * width;
+                                screenHeight = (800 / size) * height;
+
+                                heightOffset = 0;
+
+                                if(screenHeight < 300)
+                                {
+                                    heightOffset = 300 - screenHeight;
+                                }
+
+                                maze = new Tile[width, height];
+
+                                for (int i = 0; i < maze.GetLength(0); i++)
+                                {
+                                    for (int j = 0; j < maze.GetLength(1); j++)
+                                    {
+                                        CreateSquare(TileType.Empty, i, j);
+                                    }
+                                }
+
+                                Game1._graphics.PreferredBackBufferWidth = (800 / size) * width + pixelBuffer * 2 + 100;
+                                Game1._graphics.PreferredBackBufferHeight = (800 / size) * height + pixelBuffer * 2 + heightOffset;
+                                Game1._graphics.ApplyChanges();
+                            }
+                        }  
                     }
 
                     if (!MouseInsideRect(currentState, WidthTextRect) && writingWidthSize)
@@ -1687,14 +1729,18 @@ namespace Maze_Solver_Test
                 sb.Draw(Game1.whiteSquare, WidthTextRect, Color.Beige);
             else
                 sb.Draw(Game1.whiteSquare, WidthTextRect, Color.LightGreen);
-            sb.DrawString(Game1.arial, widthSizeTextBox, new Vector2(screenWidth + (int)(pixelBuffer*1.5) + 50 - (int)(widthWordSize.X/2), 2*screenHeight/3+(int)(widthWordSize.Y/2)), Color.Black);
+            sb.DrawString(Game1.arial, "Width", new Vector2(screenWidth + pixelBuffer * 2, pixelBuffer + 115), Color.Black);
+            sb.DrawString(Game1.arial, widthSizeTextBox, new Vector2(screenWidth + (int)(pixelBuffer*1.5) + 50 - (int)(widthWordSize.X/2), pixelBuffer + 156), Color.Black);
 
 
             if (!writingHeightSize)
                 sb.Draw(Game1.whiteSquare, HeightTextRect, Color.Beige);
             else
                 sb.Draw(Game1.whiteSquare, HeightTextRect, Color.LightGreen);
-            sb.DrawString(Game1.arial, heightSizeTextBox, new Vector2(screenWidth + (int)(pixelBuffer * 1.5) + 50 - (int)(heightWordSize.X / 2), screenHeight / 3 + (int)(heightWordSize.Y / 2)), Color.Black);
+            sb.DrawString(Game1.arial, "Height", new Vector2(screenWidth + pixelBuffer * 2-5,pixelBuffer+15), Color.Black);
+            sb.DrawString(Game1.arial, heightSizeTextBox, new Vector2(screenWidth + (int)(pixelBuffer * 1.5) + 50 - (int)(heightWordSize.X / 2), pixelBuffer + 56), Color.Black);
+
+            sb.Draw(Game1.whiteSquare, SizeChangeConfirm, Color.Beige);
         }
     }
 }

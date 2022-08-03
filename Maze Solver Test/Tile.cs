@@ -21,8 +21,9 @@ namespace Maze_Solver_Test
         private int width;
         private int height;
 
-        private Rectangle Rect { get { return new Rectangle(x * width + pixelBuffer, y * height + pixelBuffer, width, height); } }
+        private Rectangle Rect { get { return new Rectangle(x * width + pixelBuffer, y * height + pixelBuffer+heightOffset/2, width, height); } }
         private int pixelBuffer;
+        private int heightOffset;
 
         public int totalDistance = int.MaxValue;
         public TileType type;
@@ -30,11 +31,12 @@ namespace Maze_Solver_Test
         public int X { get { return x; } }
         public int Y { get { return y; } }
 
-        public Tile(TileType type, int x, int y,int width, int height, int buffer)
+        public Tile(TileType type, int x, int y,int width, int height, int buffer, int heightOffset)
         {
             this.x = x;
             this.y = y;
             pixelBuffer = buffer;
+            this.heightOffset = heightOffset;
 
             this.width = width;
             this.height = height;
